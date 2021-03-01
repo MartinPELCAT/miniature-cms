@@ -3,7 +3,8 @@
   "compilerOptions": {
     "module": "commonjs",
     "outDir": "dist",
-    "target": "es2017",
+    "target": "ES2017",
+    "removeComments": true,
     "sourceMap": false,
     "isolatedModules": false,
     "noEmit": false
