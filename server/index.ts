@@ -1,6 +1,8 @@
+import "reflect-metadata";
 import next from "next";
 import Koa from "koa";
 import Router from "@koa/router";
+import bodyParser from "koa-bodyparser";
 
 const PORT = parseInt(process.env.PORT || "3000", 10);
 const dev = process.env.NODE_ENV !== "production";
@@ -11,9 +13,16 @@ app.prepare().then(() => {
   const server = new Koa();
   const router = new Router();
 
+  server.use(bodyParser());
+
   router.all("(.*)", async (ctx) => {
     await handle(ctx.req, ctx.res);
     ctx.respond = false;
+  });
+
+  server.use(async (ctx, next) => {
+    ctx.res.statusCode = 200;
+    await next();
   });
 
   server.use(router.routes());
@@ -24,7 +33,6 @@ app.prepare().then(() => {
         dev ? "development" : process.env.NODE_ENV
       }`
     );
-
     process.send && process.send("ready");
   });
 });
