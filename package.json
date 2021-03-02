@@ -7,7 +7,7 @@
     "start": "cross-env NODE_ENV=production node dist/index.js",
     "deploy": "pm2 start dist/index.js -i 4 --wait-ready",
     "delete:all": "pm2 delete all",
-    "pm2:dev": "cross-env NODE_ENV=development pm2 start server/index.ts --name wordpress -i 2 --watch --wait-ready -f"
+    "pm2:dev": "cross-env NODE_ENV=development pm2 start server/index.ts --name wordpress -i 2 --watch --wait-ready -f --interpreter /usr/local/bin/node"
   },
   "dependencies": {
     "@koa/router": "^10.0.0",
