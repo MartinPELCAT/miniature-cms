@@ -4,11 +4,14 @@
     "module": "commonjs",
     "outDir": "dist",
     "target": "ES2017",
+    "baseUrl": "server",
     "removeComments": true,
     "sourceMap": false,
     "isolatedModules": false,
     "noEmit": false,
-    "strict": false
+    "strict": false,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true
   },
   "include": ["server/**/*.ts"]
 }

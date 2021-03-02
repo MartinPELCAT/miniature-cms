@@ -7,9 +7,9 @@ import { createConnection, useContainer } from "typeorm";
 import { logger } from "./utils/logger";
 import Container from "typedi";
 import { buildSchema } from "type-graphql";
-import { UserResolver } from "./resolvers/UserResolver";
 import { ApolloServer } from "apollo-server-koa";
 import { DB_CONFIG } from "./config/db";
+import { resolvers } from "./resolvers";
 
 useContainer(Container);
 
@@ -32,7 +32,7 @@ export const server = async () => {
       logger.info("Database connected");
 
       const schema = await buildSchema({
-        resolvers: [UserResolver],
+        resolvers,
         container: Container,
       });
 

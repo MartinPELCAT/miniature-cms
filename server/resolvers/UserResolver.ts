@@ -1,4 +1,4 @@
-import { User } from "../../server/entity/User";
+import { User } from "../entity/User";
 import { Query, Resolver } from "type-graphql";
 import { Service } from "typedi";
 import { InjectRepository } from "typeorm-typedi-extensions";
