@@ -1,7 +1,6 @@
 import "reflect-metadata";
 import next from "next";
 import Koa from "koa";
-import Router from "@koa/router";
 import bodyParser from "koa-bodyparser";
 import { useContainer } from "typeorm";
 import { logger } from "./utils/logger";
@@ -10,10 +9,11 @@ import { buildSchema } from "type-graphql";
 import { ApolloServer } from "apollo-server-koa";
 import { resolvers } from "./resolvers";
 import { sessionMiddleware } from "./config/session";
-import { installerRouter } from "./installer/routes";
+import { installerRouter } from "./routers/installer-routes";
 import { requireAppInstalled } from "./installer/requireAppInstalled";
 import { redisStore } from "./config/redis";
 import { INSTALLED_APP_KEY } from "./installer/keys";
+import { nextRouter } from "./routers/next/next-routes";
 
 useContainer(Container);
 
@@ -21,6 +21,7 @@ const PORT = parseInt(process.env.PORT || "3000", 10);
 const dev = process.env.NODE_ENV !== "production";
 const app = next({ dev });
 const handle = app.getRequestHandler();
+const nextRoutes = nextRouter(handle, app);
 
 export const server = async () => {
   return app.prepare().then(async () => {
@@ -30,7 +31,6 @@ export const server = async () => {
       await redisStore.del(INSTALLED_APP_KEY);
 
       const server = new Koa();
-      const router = new Router();
 
       server.use(bodyParser());
       server.use(sessionMiddleware(server));
@@ -50,26 +50,14 @@ export const server = async () => {
         context: async ({ res, req }) => ({ res, req }),
       });
 
-      apollo.applyMiddleware({ app: server, path: "/api/gql" });
-
+      // Add all routes
       server
         .use(installerRouter.routes())
         .use(installerRouter.allowedMethods());
 
-      router.use(requireAppInstalled(app));
-
-      router.all("(.*)", async (ctx) => {
-        await handle(ctx.req, ctx.res);
-        ctx.respond = false;
-        ctx.res.statusCode = 200;
-      });
-
-      // server.use(async (ctx, next) => {
-      //   ctx.res.statusCode = 200;
-      //   await next();
-      // });
-
-      server.use(router.routes()).use(router.allowedMethods());
+      server.use(requireAppInstalled(app));
+      apollo.applyMiddleware({ app: server, path: "/api/gql" });
+      server.use(nextRoutes.routes()).use(nextRoutes.allowedMethods());
 
       server.listen(PORT, () => {
         logger.info(`🚀 http://localhost:${PORT} `);

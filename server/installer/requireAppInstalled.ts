@@ -3,10 +3,9 @@ import { KoaContext } from "../types/koa-types";
 import { Next } from "koa";
 import { NextServer } from "../types/next-types";
 import { readFileSync, existsSync } from "fs";
-import { createConnection, getConnection } from "typeorm";
-import { DatabaseConfigFile, DB_CONFIG } from "../config/db";
-import { logger } from "../utils/logger";
+import { DatabaseConfigFile } from "../config/db";
 import { INSTALLED_APP_KEY, DATABASE_CONFIG_FILE, INSTALL_PATH } from "./keys";
+import { connectDatabase, connectionExist } from "../utils/database-utils";
 
 export const requireAppInstalled = (app: NextServer) => async (
   ctx: KoaContext,
@@ -23,12 +22,7 @@ export const requireAppInstalled = (app: NextServer) => async (
 
         const file = readFileSync(DATABASE_CONFIG_FILE, { encoding: "utf-8" });
         const databaseConfig: DatabaseConfigFile = JSON.parse(file);
-        logger.info("🔌 Creating connection");
-        await createConnection({
-          ...DB_CONFIG,
-          ...databaseConfig,
-        });
-        logger.info("🔌 Connection created");
+        await connectDatabase(databaseConfig);
         redisStore.set(INSTALLED_APP_KEY, "true");
         return await next();
       } else {
@@ -50,13 +44,3 @@ const renderInstall = async (app: NextServer, ctx: KoaContext) => {
   await app.render(ctx.req, ctx.res, INSTALL_PATH, ctx.query);
   ctx.respond = false;
 };
-
-const connectionExist = (): Promise<boolean> =>
-  new Promise((res) => {
-    try {
-      const isConnected = getConnection().isConnected;
-      res(isConnected);
-    } catch (error) {
-      res(false);
-    }
-  });
