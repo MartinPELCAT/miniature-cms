@@ -1,12 +1,13 @@
 import axios, { Method } from "axios";
-import { FormEvent } from "react";
+import { FormEvent, useEffect } from "react";
 import { formData2Object } from "src/utils/form-utils";
 import { Button } from "../forms/Button";
 import { Form } from "../forms/Form";
 import { FormRow } from "../forms/form-row";
 import { Input } from "../forms/Input";
+import { InstallerStepProps } from "./installer-step-props";
 
-export const InstallerDatabaseConfig = () => {
+export const InstallerDatabaseConfig = ({ onNextStep }: InstallerStepProps) => {
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const data = formData2Object(new FormData(e.currentTarget));
@@ -17,19 +18,31 @@ export const InstallerDatabaseConfig = () => {
         url: e.currentTarget.action,
         data,
       });
+      onNextStep();
     } catch (error) {
       console.log(error);
     }
   };
 
+  const checkDatabase = async () => {
+    const { data } = await axios.get("/api/installer/check-database");
+    if (data.installed) {
+      onNextStep();
+    }
+  };
+
+  useEffect(() => {
+    checkDatabase();
+  }, []);
+
   return (
     <Form
       onSubmit={handleSubmit}
-      action="/api/installer/setupDatabase"
+      action="/api/installer/setup-database"
       method="POST"
     >
       <FormRow>
-        <h1>Database</h1>
+        <h1 className="text-2xl">Step 1: Database</h1>
       </FormRow>
       <FormRow>
         <Input.Default
@@ -74,7 +87,7 @@ export const InstallerDatabaseConfig = () => {
         />
       </FormRow>
       <FormRow>
-        <Button.Default label="Valider" />
+        <Button.Default label="Submit" />
       </FormRow>
     </Form>
   );

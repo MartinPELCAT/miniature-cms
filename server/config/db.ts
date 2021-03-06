@@ -8,10 +8,9 @@ export const DB_CONFIG: PostgresConnectionOptions = {
   type: "postgres",
   logging: false,
   synchronize: true,
-  // entities: [User],
-  entities: [join(__dirname, "..", "entity/**/*{.ts,.js}")],
-  migrations: [join(__dirname, "..", "migration/**/*{.ts,.js}")],
-  subscribers: [join(__dirname, "..", "subscriber/**/*{.ts,.js}")],
+  entities: [join(__dirname, "..", "gql/entity/**/*{.ts,.js}")],
+  migrations: [join(__dirname, "..", "gql/migration/**/*{.ts,.js}")],
+  subscribers: [join(__dirname, "..", "gql/subscriber/**/*{.ts,.js}")],
 };
 
 export type DatabaseConfigFile = Pick<

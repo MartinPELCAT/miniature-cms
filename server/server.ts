@@ -7,13 +7,15 @@ import { logger } from "./utils/logger";
 import Container from "typedi";
 import { buildSchema } from "type-graphql";
 import { ApolloServer } from "apollo-server-koa";
-import { resolvers } from "./resolvers";
+import { resolvers } from "./gql/resolvers";
 import { sessionMiddleware } from "./config/session";
-import { installerRouter } from "./routers/installer-routes";
-import { requireAppInstalled } from "./installer/requireAppInstalled";
+import { installerController } from "./rest/controllers/installer-controller";
 import { redisStore } from "./config/redis";
-import { INSTALLED_APP_KEY } from "./installer/keys";
-import { nextRouter } from "./routers/next/next-routes";
+import { nextRouter } from "./rest/controllers/next-controller";
+import {
+  INSTALLED_APP_KEY,
+  requireAppInstalled,
+} from "./rest/services/installer";
 
 useContainer(Container);
 
@@ -52,8 +54,8 @@ export const server = async () => {
 
       // Add all routes
       server
-        .use(installerRouter.routes())
-        .use(installerRouter.allowedMethods());
+        .use(installerController.routes())
+        .use(installerController.allowedMethods());
 
       server.use(requireAppInstalled(app));
       apollo.applyMiddleware({ app: server, path: "/api/gql" });

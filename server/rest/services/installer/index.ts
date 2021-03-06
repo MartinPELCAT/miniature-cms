@@ -6,5 +6,8 @@ export const INSTALLED_APP_KEY = "installedApplication";
 
 export const DATABASE_CONFIG_FILE = join(
   __dirname,
-  "../config/database-config.json"
+  "../../../config/database-config.json"
 );
+
+export * from "./require-install-middleware";
+export * from "./setup-database";

@@ -1,11 +1,14 @@
-import { redisStore } from "../config/redis";
-import { KoaContext } from "../types/koa-types";
 import { Next } from "koa";
-import { NextServer } from "../types/next-types";
-import { readFileSync, existsSync } from "fs";
-import { DatabaseConfigFile } from "../config/db";
-import { INSTALLED_APP_KEY, DATABASE_CONFIG_FILE, INSTALL_PATH } from "./keys";
-import { connectDatabase, connectionExist } from "../utils/database-utils";
+import { existsSync, readFileSync } from "fs";
+import { DatabaseConfigFile } from "../../../config/db";
+import { redisStore } from "../../../config/redis";
+import { KoaContext } from "../../../types/koa-types";
+import { NextServer } from "../../../types/next-types";
+import {
+  connectionExist,
+  connectDatabase,
+} from "../../../utils/database-utils";
+import { INSTALLED_APP_KEY, DATABASE_CONFIG_FILE, INSTALL_PATH } from ".";
 
 export const requireAppInstalled = (app: NextServer) => async (
   ctx: KoaContext,
@@ -26,13 +29,13 @@ export const requireAppInstalled = (app: NextServer) => async (
         redisStore.set(INSTALLED_APP_KEY, "true");
         return await next();
       } else {
-        ctx.res.statusCode = 200;
-        if (ctx.path === INSTALL_PATH) {
-          await renderInstall(app, ctx);
-        } else {
-          ctx.redirect(INSTALL_PATH);
-          await renderInstall(app, ctx);
-        }
+        await renderInstall(app, ctx);
+        // if (ctx.path === INSTALL_PATH) {
+        //   await renderInstall(app, ctx);
+        // } else {
+        //   ctx.redirect(INSTALL_PATH);
+        //   await renderInstall(app, ctx);
+        // }
       }
     }
   } catch (error) {
@@ -41,6 +44,13 @@ export const requireAppInstalled = (app: NextServer) => async (
 };
 
 const renderInstall = async (app: NextServer, ctx: KoaContext) => {
+  ctx.res.statusCode = 200;
   await app.render(ctx.req, ctx.res, INSTALL_PATH, ctx.query);
   ctx.respond = false;
 };
+
+export const isDatabaseInstalled = async (): Promise<boolean> => {
+  return true;
+};
+
+export const isAdminInstalled = () => {};
