@@ -3,13 +3,15 @@ import next from "next";
 import Koa from "koa";
 import Router from "@koa/router";
 import bodyParser from "koa-bodyparser";
-import { createConnection, useContainer } from "typeorm";
+import { useContainer } from "typeorm";
 import { logger } from "./utils/logger";
 import Container from "typedi";
 import { buildSchema } from "type-graphql";
 import { ApolloServer } from "apollo-server-koa";
-import { DB_CONFIG } from "./config/db";
 import { resolvers } from "./resolvers";
+import { sessionMiddleware } from "./config/session";
+import { installerRouter } from "./installer/routes";
+import { requireAppInstalled } from "./installer/requireAppInstalled";
 
 useContainer(Container);
 
@@ -26,10 +28,11 @@ export const server = async () => {
       const router = new Router();
 
       server.use(bodyParser());
+      server.use(sessionMiddleware(server));
 
-      logger.info("Connecting database ... ");
-      await createConnection(DB_CONFIG);
-      logger.info("Database connected");
+      // logger.info("Connecting database ... ");
+      // await createConnection(DB_CONFIG);
+      // logger.info("Database connected");
 
       const schema = await buildSchema({
         resolvers,
@@ -48,15 +51,18 @@ export const server = async () => {
 
       apollo.applyMiddleware({ app: server, path: "/api/gql" });
 
+      server.use(requireAppInstalled(app));
+      server.use(installerRouter.routes());
+
       router.all("(.*)", async (ctx) => {
         await handle(ctx.req, ctx.res);
         ctx.respond = false;
       });
 
-      server.use(async (ctx, next) => {
-        ctx.res.statusCode = 200;
-        await next();
-      });
+      // server.use(async (ctx, next) => {
+      //   ctx.res.statusCode = 200;
+      //   await next();
+      // });
 
       server.use(router.routes());
 
