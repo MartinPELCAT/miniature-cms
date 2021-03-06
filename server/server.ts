@@ -12,6 +12,8 @@ import { resolvers } from "./resolvers";
 import { sessionMiddleware } from "./config/session";
 import { installerRouter } from "./installer/routes";
 import { requireAppInstalled } from "./installer/requireAppInstalled";
+import { redisStore } from "./config/redis";
+import { INSTALLED_APP_KEY } from "./installer/keys";
 
 useContainer(Container);
 
@@ -24,15 +26,14 @@ export const server = async () => {
   return app.prepare().then(async () => {
     try {
       logger.info("Starting Application");
+
+      await redisStore.del(INSTALLED_APP_KEY);
+
       const server = new Koa();
       const router = new Router();
 
       server.use(bodyParser());
       server.use(sessionMiddleware(server));
-
-      // logger.info("Connecting database ... ");
-      // await createConnection(DB_CONFIG);
-      // logger.info("Database connected");
 
       const schema = await buildSchema({
         resolvers,
@@ -51,12 +52,16 @@ export const server = async () => {
 
       apollo.applyMiddleware({ app: server, path: "/api/gql" });
 
-      server.use(requireAppInstalled(app));
-      server.use(installerRouter.routes());
+      server
+        .use(installerRouter.routes())
+        .use(installerRouter.allowedMethods());
+
+      router.use(requireAppInstalled(app));
 
       router.all("(.*)", async (ctx) => {
         await handle(ctx.req, ctx.res);
         ctx.respond = false;
+        ctx.res.statusCode = 200;
       });
 
       // server.use(async (ctx, next) => {
@@ -64,7 +69,7 @@ export const server = async () => {
       //   await next();
       // });
 
-      server.use(router.routes());
+      server.use(router.routes()).use(router.allowedMethods());
 
       server.listen(PORT, () => {
         logger.info(`🚀 http://localhost:${PORT} `);

@@ -3,29 +3,25 @@ import { KoaContext } from "../types/koa-types";
 import { Next } from "koa";
 import { NextServer } from "../types/next-types";
 import { readFileSync, existsSync } from "fs";
-import { join } from "path";
 import { createConnection, getConnection } from "typeorm";
 import { DatabaseConfigFile, DB_CONFIG } from "../config/db";
 import { logger } from "../utils/logger";
-
-const installPath = "/install";
-
-const databaseConfigFile = join(__dirname, "../config/database-config.json");
+import { INSTALLED_APP_KEY, DATABASE_CONFIG_FILE, INSTALL_PATH } from "./keys";
 
 export const requireAppInstalled = (app: NextServer) => async (
   ctx: KoaContext,
   next: Next
 ) => {
   try {
-    const result = await redisStore.get("installedApplication");
-    if (result) return next();
+    const result = await redisStore.get(INSTALLED_APP_KEY);
+    if (result && result === "true") return next();
     else {
-      const configFileExists = existsSync(databaseConfigFile);
+      const configFileExists = existsSync(DATABASE_CONFIG_FILE);
       if (configFileExists) {
         const isConnected = await connectionExist();
-
         if (isConnected) return await next();
-        const file = readFileSync(databaseConfigFile, { encoding: "utf-8" });
+
+        const file = readFileSync(DATABASE_CONFIG_FILE, { encoding: "utf-8" });
         const databaseConfig: DatabaseConfigFile = JSON.parse(file);
         logger.info("🔌 Creating connection");
         await createConnection({
@@ -33,14 +29,15 @@ export const requireAppInstalled = (app: NextServer) => async (
           ...databaseConfig,
         });
         logger.info("🔌 Connection created");
-
+        redisStore.set(INSTALLED_APP_KEY, "true");
         return await next();
       } else {
-        if (ctx.path === installPath) {
-          renderInstall(app, ctx);
+        ctx.res.statusCode = 200;
+        if (ctx.path === INSTALL_PATH) {
+          await renderInstall(app, ctx);
         } else {
-          ctx.redirect(installPath);
-          renderInstall(app, ctx);
+          ctx.redirect(INSTALL_PATH);
+          await renderInstall(app, ctx);
         }
       }
     }
@@ -49,8 +46,8 @@ export const requireAppInstalled = (app: NextServer) => async (
   }
 };
 
-const renderInstall = (app: NextServer, ctx: KoaContext) => {
-  app.render(ctx.req, ctx.res, installPath, ctx.query);
+const renderInstall = async (app: NextServer, ctx: KoaContext) => {
+  await app.render(ctx.req, ctx.res, INSTALL_PATH, ctx.query);
   ctx.respond = false;
 };
 
