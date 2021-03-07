@@ -18,3 +18,5 @@ export type KoaHandler = (
 ) => Promise<void>;
 
 export type KoaMiddleware = Middleware<any, {}>;
+
+export type KoaCustomReq = IncomingMessage & { session: any };

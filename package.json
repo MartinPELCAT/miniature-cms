@@ -8,11 +8,14 @@
     "deploy": "sudo cross-env NODE_ENV=production pm2 start dist/index.js -i 4 --wait-ready",
     "delete:all": "pm2 delete all",
     "reload:all": "pm2 reload all",
-    "pm2:dev": "sudo cross-env NODE_ENV=development pm2 start server/index.ts --name wordpress -i 4 --watch --wait-ready"
+    "pm2:dev": "sudo cross-env NODE_ENV=development pm2 start server/index.ts --name wordpress -i 4 --watch --wait-ready",
+    "generate:gql": "graphql-codegen --config codegen.yml"
   },
   "dependencies": {
+    "@apollo/client": "^3.3.11",
     "@koa/router": "^10.0.0",
     "apollo-server-koa": "^2.21.0",
+    "apollo-upload-client": "^14.1.3",
     "axios": "^0.21.1",
     "bcrypt": "^5.0.1",
     "cross-env": "^7.0.3",
@@ -36,6 +39,11 @@
     "winston": "^3.3.3"
   },
   "devDependencies": {
+    "@graphql-codegen/cli": "1.21.1",
+    "@graphql-codegen/typescript": "1.21.0",
+    "@graphql-codegen/typescript-operations": "1.17.14",
+    "@graphql-codegen/typescript-react-apollo": "2.2.1",
+    "@types/apollo-upload-client": "^14.1.0",
     "@types/bcrypt": "^3.0.0",
     "@types/ioredis": "^4.22.0",
     "@types/koa": "^2.13.0",

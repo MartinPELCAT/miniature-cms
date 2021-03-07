@@ -13,6 +13,7 @@ export const nextRouter = (handle: KoaHandler, _app: NextServer) => {
   // });
 
   router.all("(.*)", async (ctx) => {
+    // (ctx.req as KoaCustomReq).session = ctx.session;
     await handle(ctx.req, ctx.res);
     ctx.respond = false;
   });

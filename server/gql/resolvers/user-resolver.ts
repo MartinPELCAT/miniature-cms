@@ -1,8 +1,10 @@
 import { User } from "../entity/User";
 import {
+  Arg,
   Ctx,
   FieldResolver,
   ForbiddenError,
+  Mutation,
   Query,
   Resolver,
   Root,
@@ -12,6 +14,8 @@ import { InjectRepository } from "typeorm-typedi-extensions";
 import { getRepository, Repository } from "typeorm";
 import { Role } from "../entity/Role";
 import { KoaContext } from "server/types/koa-types";
+import { LoginInput } from "../inputs/user-inputs";
+import { compare } from "bcrypt";
 
 @Service()
 @Resolver(() => User)
@@ -39,5 +43,24 @@ export class UserResolver {
     const roles = (await found!.roles) as Role[];
     const formatedRoles = roles.map((rle) => rle.name);
     return formatedRoles;
+  }
+
+  @Mutation(() => User)
+  async login(
+    @Arg("input") { username, password }: LoginInput,
+    @Ctx() { session }: KoaContext
+  ) {
+    const userRepo = getRepository(User);
+    const user = await userRepo.findOne({
+      where: { username },
+      relations: ["roles"],
+    });
+
+    if (!user) throw new Error("User not found");
+    const isValid = await compare(password, user.password);
+    if (!isValid) throw new Error("User not found");
+    user.password = undefined!;
+    session!.user = user;
+    return user;
   }
 }

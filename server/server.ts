@@ -1,4 +1,5 @@
 import "reflect-metadata";
+import "./types";
 import next from "next";
 import Koa from "koa";
 import bodyParser from "koa-bodyparser";
@@ -36,6 +37,10 @@ export const server = async () => {
 
       server.use(bodyParser());
       server.use(sessionMiddleware(server));
+      server.use(async (ctx, next) => {
+        ctx.req.session = ctx.session;
+        return next();
+      });
 
       const schema = await buildSchema({
         resolvers,
@@ -50,7 +55,6 @@ export const server = async () => {
           },
         },
         context: async ({ ctx }) => ctx,
-        extensions: [],
         formatError: (error) => ({ message: error.message }),
       });
 

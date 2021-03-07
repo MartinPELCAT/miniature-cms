@@ -6,11 +6,9 @@ import {
   ManyToMany,
   BaseEntity,
   JoinTable,
-  BeforeInsert,
 } from "typeorm";
 import { Lazy } from "../helpers";
 import { Role, ROLE_ENUM } from "./Role";
-import { hash } from "bcrypt";
 
 @Entity()
 @ObjectType()
@@ -27,20 +25,15 @@ export class User extends BaseEntity {
   @Field({ nullable: true })
   lastName?: string;
 
-  @Column()
+  @Column({ unique: true })
   @Field()
   username!: string;
 
   @Column()
   password!: string;
 
-  @ManyToMany(() => Role, { lazy: true })
+  @ManyToMany(() => Role)
   @Field(() => [ROLE_ENUM])
   @JoinTable()
   roles!: Lazy<Role[]> | ROLE_ENUM[];
-
-  @BeforeInsert()
-  async beforeInsert() {
-    this.password = await hash(this.password, 2);
-  }
 }
