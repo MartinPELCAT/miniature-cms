@@ -8,4 +8,4 @@ export const installerController = new Router({
   .post("/setup-database", setupDatabase)
   .get("/check-database", checkDatabase)
   .post("/setup-admin", setupAdmin)
-  .post("/check-admin", setupAdmin);
+  .get("/check-admin", setupAdmin);

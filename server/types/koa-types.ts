@@ -1,7 +1,6 @@
 import { RouterParamContext } from "@koa/router";
-import { IncomingMessage } from "http";
-import { ServerResponse } from "http";
-import Koa, { ParameterizedContext } from "koa";
+import { IncomingMessage, ServerResponse } from "http";
+import Koa, { Middleware, ParameterizedContext } from "koa";
 import { UrlWithParsedQuery } from "url";
 
 export type KoaContext = ParameterizedContext<
@@ -17,3 +16,5 @@ export type KoaHandler = (
   res: ServerResponse,
   parsedUrl?: UrlWithParsedQuery | undefined
 ) => Promise<void>;
+
+export type KoaMiddleware = Middleware<any, {}>;

@@ -3,7 +3,7 @@ import next from "next";
 import Koa from "koa";
 import bodyParser from "koa-bodyparser";
 import { useContainer } from "typeorm";
-import { logger } from "./utils/logger";
+import { logger } from "./utils/logger-utils";
 import Container from "typedi";
 import { buildSchema } from "type-graphql";
 import { ApolloServer } from "apollo-server-koa";
@@ -49,7 +49,9 @@ export const server = async () => {
             "request.credentials": "same-origin",
           },
         },
-        context: async ({ res, req }) => ({ res, req }),
+        context: async ({ ctx }) => ctx,
+        extensions: [],
+        formatError: (error) => ({ message: error.message }),
       });
 
       // Add all routes
