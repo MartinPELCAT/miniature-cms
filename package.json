@@ -9,7 +9,8 @@
     "delete:all": "pm2 delete all",
     "reload:all": "pm2 reload all",
     "pm2:dev": "sudo cross-env NODE_ENV=development pm2 start server/index.ts --name wordpress -i 4 --watch --wait-ready",
-    "generate:gql": "graphql-codegen --config codegen.yml"
+    "generate:gql": "graphql-codegen --config codegen.yml",
+    "prepare": "husky install"
   },
   "dependencies": {
     "@apollo/client": "^3.3.11",
@@ -55,8 +56,10 @@
     "@types/react": "^17.0.2",
     "@types/react-dom": "^17.0.1",
     "autoprefixer": "^10.2.4",
+    "husky": "^5.1.3",
     "nodemon": "^2.0.7",
     "postcss": "^8.2.6",
+    "pretty-quick": "^3.1.0",
     "tailwindcss": "^2.0.3",
     "ts-node": "^9.1.1",
     "typescript": "^4.2.2"
