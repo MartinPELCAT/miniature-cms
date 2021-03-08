@@ -7,7 +7,12 @@ export const Header = () => {
         <a className="py-3">
           <div className="flex space-x-2 items-center">
             <div>
-              <img src="/logo.png" alt="Miniature cms logo" width={35} height={15} />
+              <img
+                src="/logo.png"
+                alt="Miniature cms logo"
+                width={35}
+                height={15}
+              />
             </div>
             <span>MCMS</span>
           </div>

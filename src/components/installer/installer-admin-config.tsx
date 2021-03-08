@@ -24,7 +24,12 @@ export const InstallerAdminConfig = ({}: InstallerStepProps) => {
         <Input.Default label="Username" name="username" required />
       </FormRow>
       <FormRow>
-        <Input.Default type="password" label="Password" name="password" required />
+        <Input.Default
+          type="password"
+          label="Password"
+          name="password"
+          required
+        />
       </FormRow>
 
       <FormRow>

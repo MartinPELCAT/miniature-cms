@@ -9,7 +9,7 @@ const CONFIG: Partial<opts> = {
   maxAge: 86400000,
   overwrite: true,
   signed: false,
-  rolling: false, // True not working with nextJS 
+  rolling: false, // True not working with nextJS
   renew: false,
   secure: false,
 };
